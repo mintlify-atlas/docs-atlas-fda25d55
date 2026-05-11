@@ -1,0 +1,44 @@
+---
+title: "Chronicle: macOS session history browser for AI CLIs"
+description: "Chronicle indexes Claude Code, Codex, and Gemini CLI sessions into local SQLite. Search, tag, pin, and resume sessions in one keystroke. Data stays on your Mac."
+---
+
+Three CLI coding assistants, three different transcript formats, all sitting in different corners of your home directory. Claude Code writes JSONL under `~/.claude/projects/`. Codex CLI writes JSONL under `~/.codex/sessions/`. Gemini CLI writes single JSON files under `~/.gemini/tmp/`. After a few weeks of real use, those folders are unreadable and ungrepable — the only way to find the session where you solved a particular bug is to remember which workspace you were in and scroll through `ls -lt`. Chronicle reads all three, indexes every session into a local SQLite database, and gives you somewhere to actually look at them. Per-provider data isolation keeps Claude, Codex, and Gemini sessions completely separate. Pin the ones that matter. Tag the ones you are tracking. Resume any of them in one keystroke, in whichever terminal you prefer. Transcripts never leave the Mac they were written on.
+
+## Key capabilities
+
+- **Multi-provider support** — reads Claude Code, Codex CLI, and Gemini CLI with full per-provider isolation
+- **Local SQLite index** — instant title search and FTS5 full-text transcript search, all on-device
+- **Smart folders** — built-in and custom saved searches filtering by date, tag, token count, and keywords
+- **Tags, pins, and archive** — organize sessions without touching the underlying files
+- **One-click resume** — picks up any session in Ghostty, iTerm, Terminal.app, Alacritty, WezTerm, or kitty
+- **Stats dashboard** — per-project token usage, cost estimates, and activity heatmaps
+- **Menubar dropdown** — press `⌘⇧O` from anywhere to see recent and pinned sessions
+- **Privacy-first** — no telemetry, no upload, no background daemon when the app is closed
+
+## Where to go next
+
+<CardGroup cols={2}>
+  <Card title="Install Chronicle" icon="download" href="/installation">
+    Homebrew cask, .pkg installer, .dmg, .zip, or build from source. macOS 15 required.
+  </Card>
+  <Card title="Session browser" icon="list" href="/features/session-browser">
+    Color-coded workspace sidebar, live session detection, and per-provider filtering.
+  </Card>
+  <Card title="Search sessions" icon="magnifying-glass" href="/features/search">
+    Instant title search plus FTS5 full-text search with composable slash filters.
+  </Card>
+  <Card title="Resume sessions" icon="terminal" href="/guides/resume-sessions">
+    Launch any session in your preferred terminal with the right provider command.
+  </Card>
+  <Card title="Stats dashboard" icon="chart-bar" href="/features/stats-dashboard">
+    Per-project token usage, estimated cost, and hour-by-weekday activity heatmaps.
+  </Card>
+  <Card title="CLI reference" icon="code" href="/cli/overview">
+    The headless `chronicle` CLI for Linux and macOS — no GUI, no SQLite indexer.
+  </Card>
+</CardGroup>
+
+<Note>
+  Chronicle requires macOS 15 (Sequoia) or newer. It uses SwiftUI APIs and variable-font features introduced in macOS 15.
+</Note>

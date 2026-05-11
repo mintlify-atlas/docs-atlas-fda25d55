@@ -1,0 +1,99 @@
+---
+title: 'iCloud Drive Sync: Metadata Across Your Macs'
+description: 'Sync tags, pins, archive flags, custom titles, notes, and smart folders across your Macs via a plain JSON file in iCloud Drive — transcripts stay local.'
+keywords: ['iCloud sync', 'metadata sync', 'tags sync', 'pins sync', 'chronicle-sync.json', 'last-write-wins', 'cross-device']
+---
+
+Chronicle can sync your organizational metadata across multiple Macs via a single JSON file in iCloud Drive. Enabling sync means that a tag or pin you apply on one machine appears on your other Macs automatically. Transcripts never move — they remain on the device where each CLI session was generated.
+
+## What syncs and what does not
+
+<Tabs>
+  <Tab title="What syncs">
+    - Pin flags (per-provider)
+    - Tag definitions and session-tag assignments (per-provider)
+    - Archive flags
+    - Custom session titles (renames)
+    - Session notes
+    - Custom smart-folder definitions
+  </Tab>
+  <Tab title="What does not sync">
+    - Transcript content (message bodies)
+    - Session files from Claude Code, Codex CLI, or Gemini CLI
+    - File paths beyond the workspace name
+    - Built-in smart folders (they are re-seeded per provider on first launch of each machine)
+  </Tab>
+</Tabs>
+
+## Enabling sync
+
+<Steps>
+  <Step title="Open Settings">
+    Press `⌘,` to open Settings.
+  </Step>
+  <Step title="Open the Sync pane">
+    Click **Sync** in the Settings sidebar.
+  </Step>
+  <Step title="Toggle iCloud Drive sync on">
+    Flip the iCloud Drive sync toggle. Chronicle creates the sync file immediately and performs an initial push of your local metadata.
+  </Step>
+</Steps>
+
+<Info>
+  You must be signed into iCloud on your Mac and have iCloud Drive enabled in System Settings for the toggle to be active. If iCloud Drive is paused or unavailable, the Settings pane shows the error inline next to the toggle.
+</Info>
+
+## Sync file location
+
+Chronicle stores all synced data in a single file:
+
+```
+~/Library/Mobile Documents/com~apple~CloudDocs/Chronicle/chronicle-sync.json
+```
+
+The file is plain, human-readable JSON. You can open it in any text editor to inspect its contents. The top-level keys are `version`, `exported_at`, `user_metadata`, `tags`, `session_tags`, and `smart_folders`.
+
+## Sync model
+
+Chronicle uses a **last-write-wins** model per record, keyed by session ID and provider. The `updated_at` timestamp on each metadata record determines which version wins when the same record exists on two machines. Tags use a small per-tag union merge so that adding a tag on one Mac and a different tag on another Mac does not cause either to be lost.
+
+<Note>
+  Sync is designed for personal use across your own machines. Chronicle does not support collaborative editing — there is no conflict resolution for simultaneous edits by different people to the same record.
+</Note>
+
+## Per-provider scoping in sync
+
+Every record in the sync file carries the provider it belongs to (`claude`, `codex`, or `gemini`). This means:
+
+- A Codex pin on Mac A does not appear under Claude on Mac B.
+- Tags you create under Gemini on one machine do not bleed into your Claude tag list on another.
+- Provider isolation is preserved end-to-end through the sync round trip.
+
+## The Sync pane in Settings
+
+The **Sync** pane in Settings (`⌘,`) shows:
+
+| Field | Description |
+|---|---|
+| Last pull | Timestamp of the most recent successful read from iCloud Drive |
+| Last push | Timestamp of the most recent successful write to iCloud Drive |
+| Last error | Shown inline if iCloud Drive is paused, unreachable, or the user is not signed in |
+| Sync now | Forces a pull-then-push round trip immediately |
+
+**Sync now** is equivalent to the `reconcileOnBootstrap` operation Chronicle runs at launch: it pulls the remote file and merges it into local state, then pushes local state back out so the remote gains any new local rows.
+
+## Disabling sync
+
+Toggle the iCloud Drive sync switch off in Settings → **Sync**. Chronicle stops writing to the sync file. Your local metadata is not affected. The sync file in iCloud Drive remains until you remove it manually.
+
+## Wiping the cloud copy
+
+To delete all synced data from iCloud Drive, remove the Chronicle folder inside your iCloud Drive container:
+
+```bash
+rm -rf ~/Library/Mobile\ Documents/com~apple~CloudDocs/Chronicle/
+```
+
+<Warning>
+  This permanently deletes the sync file from iCloud Drive and from any other Mac that has not yet pulled the latest version. Your local Chronicle data (the SQLite database) is not affected.
+</Warning>

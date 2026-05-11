@@ -1,0 +1,79 @@
+---
+title: "Install the chronicle CLI on Linux and macOS"
+description: "Download a static chronicle binary for Linux (x86_64 or aarch64) or build from source. Verify the SHA256 checksum from the GitHub release page."
+---
+
+The `chronicle` CLI is distributed as a statically linked binary for Linux. On macOS, you can download the same binary or build from source using the Swift Package Manager.
+
+## Linux
+
+The following script auto-detects your architecture and installs the CLI to `/usr/local/bin/`:
+
+```bash
+VERSION=0.1.4
+ARCH=$(uname -m); case "$ARCH" in aarch64|arm64) ARCH=aarch64 ;; *) ARCH=x86_64 ;; esac
+curl -fsSL "https://github.com/josephyaduvanshi/claude-history-manager/releases/download/v${VERSION}/chronicle-${VERSION}-linux-${ARCH}.tar.gz" \
+  | tar xz -C /tmp
+sudo install -m 0755 /tmp/chronicle /usr/local/bin/chronicle
+chronicle --version
+```
+
+Replace `0.1.4` with the version you want from the [GitHub Releases page](https://github.com/josephyaduvanshi/claude-history-manager/releases).
+
+### Verifying the checksum
+
+Each tarball has a matching `.sha256` file on the release page. Download both, then verify:
+
+```bash
+# Download the sha256 file alongside the tarball
+curl -fsSL "https://github.com/josephyaduvanshi/claude-history-manager/releases/download/v${VERSION}/chronicle-${VERSION}-linux-${ARCH}.tar.gz.sha256" \
+  -o /tmp/chronicle.tar.gz.sha256
+
+# Verify
+sha256sum --check /tmp/chronicle.tar.gz.sha256
+```
+
+The file is named `chronicle-<version>-linux-<arch>.tar.gz.sha256` on the release page, next to the corresponding tarball.
+
+## macOS — build from source
+
+On macOS, build the CLI directly from the repository using the Swift Package Manager. The `ChronicleCLI` target is included in `Package.swift`.
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/josephyaduvanshi/claude-history-manager.git
+    cd claude-history-manager
+    ```
+  </Step>
+  <Step title="Build the CLI target">
+    ```bash
+    swift build -c release --product chronicle
+    ```
+  </Step>
+  <Step title="Install the binary">
+    ```bash
+    sudo install -m 0755 .build/release/chronicle /usr/local/bin/chronicle
+    ```
+  </Step>
+  <Step title="Verify the install">
+    ```bash
+    chronicle --version
+    ```
+  </Step>
+</Steps>
+
+<Note>
+  A recent Xcode toolchain is required to build on macOS. The `swift` command is included with Xcode Command Line Tools — run `xcode-select --install` if `swift` is not found.
+</Note>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="CLI commands" icon="terminal" href="/cli/commands">
+    Full flag reference and examples for list, sessions, search, and show.
+  </Card>
+  <Card title="CLI overview" icon="code" href="/cli/overview">
+    What the CLI is, what it reads, and how it differs from the macOS app.
+  </Card>
+</CardGroup>

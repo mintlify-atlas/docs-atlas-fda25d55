@@ -1,0 +1,67 @@
+---
+title: "Configure default terminal and editor in Chronicle"
+description: "Set your default terminal and editor in Chronicle. Detects Ghostty, iTerm, Terminal.app, Alacritty, WezTerm, kitty, VS Code, Cursor, Zed, and Xcode."
+---
+
+Chronicle launches sessions in your terminal and opens working directories in your editor. Both launchers detect which apps are installed on your Mac and only show you the ones that are available. You can set a default for each, then override it per-session when you need a different one.
+
+Open **Settings** with `⌘,`, then select the **Terminal** or **Editor** tab.
+
+## Configuring your default terminal
+
+Chronicle supports six terminals for session resume. Open **Settings → Terminal** and select the one you want as your default.
+
+| Terminal | Notes |
+|---|---|
+| Ghostty | See [Ghostty security prompt](#ghostty-security-prompt) below. |
+| iTerm | Opened via AppleScript. |
+| Terminal.app | macOS built-in; always available as a fallback. |
+| Alacritty | Launched via the Alacritty CLI. |
+| WezTerm | Launched via the WezTerm CLI. |
+| kitty | Launched via the kitty remote-control interface. |
+
+Only terminals that are installed appear in the list. If a terminal you expected to see is missing, verify it is installed as a `.app` bundle in `/Applications/` or that its CLI shim is on your `PATH`.
+
+### App detection
+
+Chronicle resolves terminals in this order:
+
+1. **`.app` bundle** — looks for the app in `/Applications/` and standard install locations.
+2. **CLI shim on `PATH`** — falls back to the command-line shim if no bundle is found.
+
+If neither is present, the terminal is omitted from the picker.
+
+### Per-session terminal override
+
+To use a different terminal for a single session without changing your default, press `⌘↵` with the session selected. A terminal picker dropdown appears for that session only. Your default is not changed.
+
+### Ghostty security prompt
+
+<Warning>
+  Every time you resume a session in Ghostty, macOS shows an "Allow Ghostty to execute…" confirmation dialog. This is a Ghostty security gate ([discussion #10203](https://github.com/ghostty-org/ghostty/discussions/10203)) built into Ghostty itself and cannot be disabled in Ghostty's configuration. The other supported terminals do not show this prompt.
+</Warning>
+
+## Configuring your default editor
+
+Chronicle supports four editors for the **Open in \<Editor\>** action. Open **Settings → Editor** and select one.
+
+| Editor | Detection |
+|---|---|
+| VS Code | `.app` bundle or `code` CLI shim |
+| Cursor | `.app` bundle or `cursor` CLI shim |
+| Zed | `.app` bundle or `zed` CLI shim |
+| Xcode | `.app` bundle (always available on a Mac with Xcode installed) |
+
+Detection follows the same order as terminals: `.app` bundle first, CLI shim on `PATH` as fallback. Only installed editors appear in the list.
+
+## Provider-specific resume commands
+
+When Chronicle launches a session, it automatically routes to the correct CLI for that session's provider. You do not need to configure anything per-provider.
+
+| Provider | Resume command |
+|---|---|
+| Claude Code | `claude --resume <uuid>` |
+| Codex CLI | `codex resume <uuid>` |
+| Gemini CLI | `gemini --resume <uuid>` |
+
+Note that Codex uses `resume` as a subcommand, not a flag — `codex --resume` is not valid syntax.

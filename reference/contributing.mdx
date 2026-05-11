@@ -1,0 +1,41 @@
+---
+title: "Contributing to Chronicle"
+description: "How to file bugs, propose features, and submit pull requests to Chronicle. Run swift test before sending a PR — test fixtures don't require a live CLI session."
+---
+
+Chronicle is an open-source project and welcomes issues and pull requests. The source lives at [github.com/josephyaduvanshi/claude-history-manager](https://github.com/josephyaduvanshi/claude-history-manager).
+
+## Filing a bug
+
+Open an issue on GitHub. Include:
+
+- The output of `swift --version`
+- Your macOS version (from **Apple menu → About This Mac**)
+- A description of what you expected to happen and what actually happened
+- Steps to reproduce, if possible
+
+## Proposing a feature
+
+Open an issue first before starting implementation. This lets maintainers give early feedback on scope and approach, so you don't spend time building something that turns out to be out of scope or better done a different way.
+
+## Running the test suite
+
+Chronicle's tests use fixture transcript files rather than live CLI sessions, so you don't need a populated `~/.claude/projects/`, `~/.codex/sessions/`, or `~/.gemini/tmp/` to run them.
+
+```bash
+swift test
+```
+
+Run this before sending a pull request. Tests that fail on `main` should be reported as bugs before they're fixed in a PR; tests that fail only on your branch should be fixed before the PR is opened.
+
+## Test fixtures
+
+Fixture transcripts are under `ChronicleTests/Fixtures/`, organized with one folder per provider. If you are adding support for a new provider feature or a new transcript format, add matching fixtures there rather than relying on real session files.
+
+## Code of conduct
+
+Chronicle follows the code of conduct in `CODE_OF_CONDUCT.md` in the repository root. Read it before participating.
+
+## License
+
+Chronicle is MIT licensed. By submitting a pull request, you agree that your contribution will be licensed under the same terms. See `LICENSE` in the repository root for the full text.

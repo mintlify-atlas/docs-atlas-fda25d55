@@ -1,0 +1,71 @@
+---
+title: "Chronicle privacy: local-only, no telemetry"
+description: "Chronicle runs entirely on your Mac. No transcripts are uploaded, no telemetry is sent, and the only outbound call is the update check you trigger manually."
+---
+
+Chronicle is designed around a simple rule: your session transcripts stay on the machine that wrote them. The app reads session files directly from your home directory, indexes them into a local database, and never sends transcript content — or any other data — to an external service.
+
+## Where data lives
+
+| Location | What it contains | Who writes it |
+|---|---|---|
+| `~/.claude/projects/` | Claude Code session transcripts (JSONL) | Claude Code CLI |
+| `~/.codex/sessions/` | Codex CLI session transcripts (JSONL) | Codex CLI |
+| `~/.gemini/tmp/` | Gemini CLI session JSON files | Gemini CLI |
+| `~/Library/Application Support/Chronicle/chronicle.sqlite` | Chronicle's search index, plus pins, tags, notes, custom titles, and smart-folder definitions | Chronicle |
+
+Chronicle reads the first three locations but never writes to them. The underlying session files are always exactly what the CLI tools wrote.
+
+## iCloud sync
+
+When you enable iCloud sync in **Settings → Sync**, Chronicle writes one additional file:
+
+```
+~/Library/Mobile Documents/com~apple~CloudDocs/Chronicle/chronicle-sync.json
+```
+
+This file contains only metadata: tags, pin flags, archive flags, custom titles, notes, and smart-folder definitions. It does not contain transcripts, message bodies, file paths beyond the workspace name, or any session content.
+
+The file is plain JSON — you can open it in any text editor to see exactly what is stored. Every record in the sync file carries a `provider` field so that a Codex pin on one Mac does not appear under Claude on another.
+
+<Note>
+  Transcripts stay on the device they were generated on. The CLIs write per-machine; Chronicle does not move or replicate transcript files.
+</Note>
+
+## Network activity
+
+Chronicle makes exactly one outbound network call: fetching the latest release metadata from GitHub when you click **Chronicle → Check for updates…** in the menu bar. This call is never made automatically — no polling, no background check, no telemetry.
+
+There is no crash reporter, no analytics SDK, and no "anonymous usage data" collection of any kind.
+
+## App sandbox
+
+Chronicle is not sandboxed. Reading from `~/.claude/projects/`, `~/.codex/sessions/`, and `~/.gemini/tmp/`, writing to its own Application Support folder, and shelling out to launch terminals are all operations that are incompatible with the macOS App Sandbox. The binary is plain and unsandboxed. If a future App Store release happens, sandboxing will be revisited at that time.
+
+## Uninstalling
+
+To remove Chronicle and all data it stores on your Mac:
+
+<Steps>
+  <Step title="Quit Chronicle">
+    Quit the app from the menu bar or Dock before removing files.
+  </Step>
+  <Step title="Drag the app to Trash">
+    Move `Chronicle.app` from `/Applications/` to the Trash.
+  </Step>
+  <Step title="Remove the database and preferences">
+    ```bash
+    rm -rf ~/Library/Application\ Support/Chronicle
+    defaults delete com.chronicle.app
+    ```
+  </Step>
+  <Step title="Remove the iCloud sync file (optional)">
+    If you had iCloud sync enabled and want to remove the cloud copy:
+
+    ```bash
+    rm -rf ~/Library/Mobile\ Documents/com~apple~CloudDocs/Chronicle
+    ```
+  </Step>
+</Steps>
+
+Removing the Application Support folder gives you a clean re-index on next launch if you reinstall. The underlying CLI session files in `~/.claude/projects/`, `~/.codex/sessions/`, and `~/.gemini/tmp/` are never touched by the uninstall process.

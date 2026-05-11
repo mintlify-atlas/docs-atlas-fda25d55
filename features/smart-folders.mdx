@@ -1,0 +1,96 @@
+---
+title: 'Smart Folders: Saved Searches for Session History'
+description: 'Filter sessions with smart folders by workspace, tag, token range, date, and flags. Built-in and custom folders re-run automatically and sync via iCloud Drive.'
+keywords: ['smart folders', 'saved searches', 'session filters', 'compound query', 'iCloud sync', 'tags', 'token range']
+---
+
+Smart folders are saved queries that live in the sidebar alongside your workspaces. They re-run automatically each time you select them, so their contents always reflect the current state of your session index. Chronicle ships four built-in smart folders and lets you create an unlimited number of custom compound folders with their own filter combinations.
+
+## Built-in smart folders
+
+Four smart folders are seeded on first launch and cannot be deleted or renamed:
+
+<CardGroup cols={2}>
+  <Card title="Today" icon="calendar">
+    Sessions modified on the current calendar day.
+  </Card>
+  <Card title="This week" icon="clock">
+    Sessions modified within the last 7 days.
+  </Card>
+  <Card title="Used `git push`" icon="arrow-up">
+    Sessions where the assistant invoked `git push` during the conversation, detected from the session's tool-call flags.
+  </Card>
+  <Card title="Errored sessions" icon="triangle-alert">
+    Sessions that terminated with an error or that the CLI marked as failed.
+  </Card>
+</CardGroup>
+
+## Smart folder query types
+
+Every smart folder is backed by a `SmartFolderQuery` value persisted as JSON in the database. The available query cases are:
+
+| Case | Description |
+|---|---|
+| `.today` | Sessions modified today |
+| `.thisWeek` | Sessions modified in the last 7 days |
+| `.lastNDays(Int)` | Sessions modified within the last N days |
+| `.usedGitPush` | Sessions with a `git_push` flag |
+| `.erroredSessions` | Sessions with an `errored` flag |
+| `.search(SearchQuery)` | A saved search query (supports all slash filters) |
+| `.compound(SmartFolderCompoundQuery)` | A rich user-authored filter (see below) |
+
+Unknown query types in the database decode to a `.custom(raw:)` case and render as regular saved searches — no crash, no data loss when opening a database from a newer Chronicle version.
+
+## Creating custom smart folders
+
+Custom smart folders use the `.compound` query type, which lets you combine multiple independent filter conditions. All conditions are ANDed together — a session must satisfy every active filter to appear in the folder.
+
+<Steps>
+  <Step title="Open the new folder sheet">
+    Click the `+` button in the Smart Folders section of the sidebar, or use the File menu.
+  </Step>
+  <Step title="Set a name">
+    Give the folder a descriptive name that will appear in the sidebar.
+  </Step>
+  <Step title="Configure filters">
+    Add any combination of the available filters. At least one filter must be active — a completely blank compound query would match every session, which Chronicle prevents you from saving.
+  </Step>
+  <Step title="Save">
+    Click Save. The folder appears in the sidebar immediately and updates automatically.
+  </Step>
+</Steps>
+
+## Available compound filters
+
+<AccordionGroup>
+  <Accordion title="Workspace (workspaceID)">
+    Restrict results to a single workspace. The value is the workspace's internal ID — the dash-encoded folder name under `~/.claude/projects/` for Claude sessions, or the equivalent key for Codex and Gemini.
+  </Accordion>
+  <Accordion title="Tags (tagIDs)">
+    Sessions must carry every tag in the list. Specify one or more tag IDs from your tag library. An empty tag list means no tag constraint.
+  </Accordion>
+  <Accordion title="Token range (minTokens / maxTokens)">
+    Filter by total token count. Set only a lower bound (`minTokens`) to find long sessions, only an upper bound (`maxTokens`) to find short ones, or both for a range. Either bound is inclusive.
+  </Accordion>
+  <Accordion title="Date range (sinceDays)">
+    Equivalent to "modified within the last N days". Translates to a `last_modified_at >= now − N × 86400` SQL clause. Leave unset for no date constraint.
+  </Accordion>
+  <Accordion title="Flags (flags)">
+    Sessions must carry every flag in the list. The flag strings that Chronicle currently tracks are `git_push` and `errored`, matching the built-in smart folders.
+  </Accordion>
+  <Accordion title="Search text (searchText)">
+    Optional free text. When non-blank, runs the same title-`LIKE` or FTS5 transcript search that the main search bar uses.
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+  The Save button is disabled when all compound filter fields are empty. A blank compound query would match every non-deleted, non-archived session, which is almost never the intended behavior.
+</Warning>
+
+## iCloud sync
+
+When iCloud Drive sync is enabled in Settings, smart folder definitions sync alongside tags, pins, notes, and custom titles. Every synced record carries the provider it belongs to (`.claude`, `.codex`, or `.gemini`), so a smart folder you create under Claude does not appear in your Codex sidebar on another Mac.
+
+<Note>
+  Transcript content never syncs. Only the folder definition (name, query, sort order) travels through iCloud. The sessions themselves remain on the device that generated them.
+</Note>

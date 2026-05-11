@@ -1,0 +1,130 @@
+---
+title: "Your first launch: indexing and permissions"
+description: "What Chronicle does on first launch — Gatekeeper dialogs by install method, granting Full Disk Access, and the one-time 60–90 second indexing step."
+---
+
+The first time you open Chronicle, two things happen: macOS may show a Gatekeeper dialog depending on how you installed the app, and Chronicle indexes your session history from all three providers into a local SQLite database. Both are one-time events. After that, Chronicle opens in around 75 milliseconds and Gatekeeper never prompts again.
+
+## First-launch flow
+
+<Steps>
+  <Step title="Clear any Gatekeeper prompt">
+    Depending on your install method, macOS may block Chronicle on the first open. See the [Gatekeeper details](#gatekeeper-by-install-method) below for exactly what to do. Homebrew users see nothing and can skip this step.
+  </Step>
+  <Step title="Grant Full Disk Access (if needed)">
+    Chronicle reads session files from `~/.claude/projects/`, `~/.codex/sessions/`, and `~/.gemini/tmp/`. On some systems, macOS restricts access to these directories. If the sidebar is empty after indexing, go to **System Settings → Privacy & Security → Full Disk Access**, find Chronicle in the list, and toggle it on. Then relaunch the app.
+  </Step>
+  <Step title="Wait for initial indexing">
+    Chronicle indexes your entire session history on first launch. For a few thousand sessions this takes about **60–90 seconds**. A progress indicator appears in the sidebar while indexing runs. This happens once — subsequent launches use the cached SQLite database.
+
+    <Note>
+      The indexer reads only file metadata and transcript content. Nothing is sent off your Mac. The database is written to `~/Library/Application Support/Chronicle/chronicle.sqlite`.
+    </Note>
+  </Step>
+  <Step title="Browse your sessions">
+    Once indexing completes, the workspace sidebar populates with your projects grouped by provider (Claude Code, Codex CLI, Gemini CLI) and color-coded by workspace category. Select any session to read the transcript, or press `⌘K` to search.
+  </Step>
+</Steps>
+
+## Gatekeeper by install method
+
+Chronicle is ad-hoc signed, not notarized. The exact dialog you see on first launch depends on which installation method you used. Each method requires a one-time acknowledgment — after that, the binary launches normally forever.
+
+| Install method | What macOS shows | What to do |
+|---|---|---|
+| `brew install --cask chronicle` | Nothing — the `.pkg` postinstall script strips the quarantine attribute before the app ever opens. | Just open Chronicle. No prompt appears. |
+| `.pkg` installer | "macOS cannot verify the developer of this package." | Right-click the `.pkg` → **Open** → **Open** in the second dialog. |
+| `.dmg` | "Apple could not verify Chronicle is free of malware." | Run `xattr -cr /Applications/Chronicle.app` in Terminal, or right-click `Chronicle.app` → **Open** → **Open**. |
+| `.zip` | Same message as `.dmg`. | Same as `.dmg`. |
+
+<AccordionGroup>
+  <Accordion title="Homebrew install — no prompt">
+    Homebrew runs Chronicle's `.pkg` installer under the hood. The package's postinstall script calls `xattr -dr com.apple.quarantine /Applications/Chronicle.app` before the app is ever launched, so Gatekeeper has nothing to block. Open Chronicle from `/Applications/` or Spotlight and it starts immediately.
+  </Accordion>
+  <Accordion title=".pkg install — one right-click">
+    macOS cannot verify the identity of the package because it isn't signed with a paid Developer ID. To proceed: right-click (or Control-click) the `.pkg` file in Finder and choose **Open**. A second dialog appears asking if you're sure — click **Open** again. The installer then runs normally and Chronicle launches without any further prompts.
+  </Accordion>
+  <Accordion title=".dmg or .zip install — one terminal command">
+    Files downloaded from the internet receive a `com.apple.quarantine` extended attribute that Gatekeeper checks before allowing the app to run. Remove it with:
+
+    ```bash
+    xattr -cr /Applications/Chronicle.app
+    ```
+
+    Run this once in Terminal after dragging `Chronicle.app` to `/Applications/`. If you skip this step, Chronicle still opens — it detects the quarantine attribute and shows an in-app card with this same command and a copy-to-clipboard button.
+
+    Alternatively, right-click `Chronicle.app` in Finder → **Open** → **Open** to bypass Gatekeeper without using Terminal.
+  </Accordion>
+</AccordionGroup>
+
+### Why ad-hoc signing?
+
+<Note>
+  Chronicle is built with an ad-hoc signing key, not a paid Apple Developer ID. Apple's Gatekeeper trusts binaries that are signed with a Developer ID account ($99/year) and submitted to Apple's notarization servers. This project doesn't carry that account yet.
+
+  The binary you download is bit-for-bit what the GitHub Actions workflow at `.github/workflows/release.yml` builds from `main`. Every release page lists a `.shasums` file — download it and run `shasum -c chronicle.shasums` to verify your download before opening it. The Gatekeeper warning is not a malware detection; it only means Apple hasn't pre-screened this specific build.
+</Note>
+
+## Granting Full Disk Access
+
+Chronicle reads transcript files that Claude Code, Codex CLI, and Gemini CLI write to your home directory. If macOS restricts access to those paths, the sidebar will appear empty even after indexing completes.
+
+<Steps>
+  <Step title="Open System Settings">
+    Go to **Apple menu → System Settings**, or use Spotlight (`⌘Space`) and search for "System Settings".
+  </Step>
+  <Step title="Navigate to Full Disk Access">
+    Select **Privacy & Security** in the sidebar, then scroll down and click **Full Disk Access**.
+  </Step>
+  <Step title="Enable Chronicle">
+    Click the **+** button (you may need to authenticate with Touch ID or your password), then navigate to `/Applications/` and select `Chronicle.app`. Make sure the toggle next to Chronicle is on.
+  </Step>
+  <Step title="Relaunch Chronicle">
+    Quit Chronicle (`⌘Q`) and reopen it. Indexing will start automatically and the sidebar will populate once it completes.
+  </Step>
+</Steps>
+
+<Tip>
+  If you installed Chronicle via Homebrew and the sidebar is still empty after granting Full Disk Access, confirm that the CLI tools you use (Claude Code, Codex CLI, Gemini CLI) have been run at least once so their session directories exist.
+</Tip>
+
+## What indexing does
+
+Chronicle's indexer reads each provider's transcript format and writes the results into a local SQLite database:
+
+- **Claude Code** — reads JSONL files under `~/.claude/projects/`
+- **Codex CLI** — reads JSONL rollout files under `~/.codex/sessions/`
+- **Gemini CLI** — reads JSON session files under `~/.gemini/tmp/`
+
+For each session, Chronicle extracts the title, message count, token usage, model name, tools used, timestamps, and workspace path, then stores all of it in `~/Library/Application Support/Chronicle/chronicle.sqlite`.
+
+The first index is the only slow one — 60 to 90 seconds for a few thousand sessions is typical. After that, a file-system watcher (using FSEvents, not polling) tracks only files whose size or modification time changed. A warm cache for 35 workspaces and 440 sessions reopens in around **75 milliseconds**.
+
+<Note>
+  If you ever want a clean re-index, delete the database folder and relaunch:
+
+  ```bash
+  rm -rf ~/Library/Application\ Support/Chronicle
+  ```
+
+  Chronicle will re-index everything on next launch.
+</Note>
+
+## After indexing: what you'll see
+
+Once the initial index completes, the Chronicle window shows:
+
+- **Workspace sidebar** — projects grouped by provider and color-coded by category (Flutter, Rust, Python, Web, and more)
+- **Session list** — sessions within the selected workspace, sorted newest first, with live indicators for any sessions a CLI is actively writing to
+- **Search bar** — press `⌘K` to focus; type `/full: query` for FTS5 full-text search across all transcript bodies
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Search sessions" icon="magnifying-glass" href="/features/search">
+    Learn the slash-filter syntax and full-text search to find any session in seconds.
+  </Card>
+  <Card title="Resume sessions" icon="terminal" href="/guides/resume-sessions">
+    Pick up any session in Ghostty, iTerm, Terminal.app, Alacritty, WezTerm, or kitty.
+  </Card>
+</CardGroup>

@@ -1,0 +1,107 @@
+---
+title: 'Search and Slash Filters for CLI Session History'
+description: 'Find any session instantly with title search, FTS5 full-text transcript search, and composable slash filters for date ranges, tags, and workspaces.'
+keywords: ['search', 'slash filters', 'full-text search', 'FTS5', 'tag filter', 'workspace filter', 'date filter']
+---
+
+Chronicle's search bar combines instant title search with a set of slash-command filters that let you narrow sessions by date, tag, workspace, or transcript content. Filters compose left-to-right in a single query string — no separate filter UI to open. All results are scoped to the active provider; switching from Claude to Codex clears the results and re-runs the query against the new provider's index.
+
+Press `⌘K` to focus the search bar from anywhere in the app.
+
+## How parsing works
+
+The query bar parses your input left-to-right, token by token. Slash-prefixed tokens (`/today`, `/tag:bug`, `/in:rust`) set structured filters. Everything else accumulates as free-form title text matched with a `LIKE` query against indexed session titles. Unknown slash tokens are treated as plain title text — a typo like `/tday` won't silently disappear from your query.
+
+<Info>
+  The default result limit is 500 rows. The limit applies after all filters are evaluated.
+</Info>
+
+## Slash filter reference
+
+<AccordionGroup>
+  <Accordion title="/full: &lt;query&gt; — full-text transcript search">
+    Searches across the full transcript bodies of every session, not just titles. Uses an FTS5 virtual table built lazily on first use — the index is constructed the first time you type `/full:` and cached for subsequent searches.
+
+    The `/full:` token is greedy: everything that follows on the same line is treated as the search query, including spaces. You do not need quotes for multi-word queries.
+
+    ```text
+    /full: EXC_BAD_ACCESS
+    /full: async let task cancelled
+    ```
+  </Accordion>
+  <Accordion title="/today — sessions modified today">
+    Filters to sessions whose `last_modified_at` timestamp falls within the current calendar day (local time).
+
+    ```text
+    /today
+    /today refactor
+    ```
+  </Accordion>
+  <Accordion title="/this-week or /thisweek — last 7 days">
+    Both spellings are equivalent. Filters to sessions modified within the last 7 days.
+
+    ```text
+    /this-week
+    /thisweek auth
+    ```
+  </Accordion>
+  <Accordion title="/last30days, /last-30d, or /last30d — last 30 days">
+    All three spellings are equivalent. Filters to sessions modified within the last 30 days.
+
+    ```text
+    /last30days
+    /last-30d performance
+    /last30d
+    ```
+  </Accordion>
+  <Accordion title="/tag:&lt;name&gt; — filter by tag">
+    Filters to sessions carrying a specific tag. Use double quotes for tag names that contain spaces.
+
+    ```text
+    /tag:bug
+    /tag:client-work
+    /tag:"client work"
+    ```
+
+    You can apply multiple `/tag:` filters in the same query; only sessions carrying all specified tags are returned.
+
+    ```text
+    /tag:bug /tag:regression
+    ```
+  </Accordion>
+  <Accordion title="/in:&lt;path&gt; — filter by workspace">
+    Filters to sessions in a specific workspace, matched against the workspace's display name or decoded filesystem path. Use double quotes for workspace names or paths that contain spaces.
+
+    ```text
+    /in:rust
+    /in:flutter
+    /in:"my project"
+    /in:"/Users/you/Code/flutter/myapp"
+    ```
+
+    Like `/tag:`, multiple `/in:` filters are supported and ANDed together.
+  </Accordion>
+</AccordionGroup>
+
+## Combining filters
+
+Filters compose in the order you type them. Any non-slash tokens between or after slash tokens become the title search text. The query is always evaluated as a conjunction — all active filters must match.
+
+| Query | What it means |
+|---|---|
+| `/in:rust /tag:bug panic` | Rust workspaces, tagged `bug`, title contains "panic" |
+| `/today /full: connection refused` | Sessions from today whose transcript mentions "connection refused" |
+| `/this-week /tag:client-work invoice` | This week's sessions tagged `client-work`, title contains "invoice" |
+| `/last30days /in:flutter /tag:crash` | Flutter sessions in the last 30 days tagged `crash` |
+
+<Tip>
+  The title text portion of the query (anything that isn't a slash token) uses a case-insensitive `LIKE` match. You don't need wildcards — `panic` matches "add panic handler" and "panic in thread".
+</Tip>
+
+## Full-text search details
+
+Full-text search with `/full:` queries an FTS5 virtual table over the transcript bodies of all sessions. This table is built lazily the first time you use `/full:` — expect a short delay on that first search while the index is constructed. Subsequent `/full:` queries use the cached index.
+
+<Note>
+  FTS5 indexing is per-provider. Switching providers discards the current result set; the FTS index for the new provider is built on demand when you next use `/full:`.
+</Note>

@@ -1,0 +1,108 @@
+---
+title: "chronicle CLI command reference"
+description: "Full reference for the four chronicle commands — list, sessions, search, show — with flags, defaults, and usage examples drawn from the source."
+---
+
+The `chronicle` CLI exposes four commands. All commands accept `--root <path>` to override the default `~/.claude/projects/` directory. Run `chronicle --help` at any time to see the usage summary.
+
+## `chronicle list`
+
+Shows every workspace directory under `~/.claude/projects/` with its session count and the timestamp of the most recent session activity.
+
+```bash
+chronicle list
+```
+
+No flags. Output is one line per workspace, sorted by most recent activity.
+
+## `chronicle sessions`
+
+Lists sessions in a workspace, newest first.
+
+```bash
+chronicle sessions [-w <workspace>] [-n <count>]
+```
+
+| Flag | Alias | Description | Default |
+|---|---|---|---|
+| `-w <workspace>` | `--workspace` | Workspace to list sessions from. Accepts the on-disk folder name (e.g. `-Users-foo-bar`) or the decoded path (e.g. `/Users/foo/bar`). | Workspace matching `$PWD` |
+| `-n <count>` | `--limit` | Number of sessions to show. | `25` |
+
+If `-w` is omitted, Chronicle matches your current working directory against the decoded workspace paths. This means running `chronicle sessions` from inside a project directory shows that project's sessions automatically.
+
+## `chronicle search`
+
+Performs a substring search across every session transcript under the root directory and prints each match with its session ID, line number, and a preview snippet.
+
+```bash
+chronicle search <query> [--limit <n>]
+```
+
+| Flag | Alias | Description | Default |
+|---|---|---|---|
+| `--limit <n>` | `-n` | Maximum number of matches to return. | `50` |
+
+The query is a plain substring — no regex, no FTS syntax. Everything after the flags is joined as the query string, so multi-word queries do not need quotes:
+
+```bash
+chronicle search EXC_BAD_ACCESS
+chronicle search async let task cancelled --limit 100
+```
+
+Output format per match: `<session-id>:<line-number>:<preview>`.
+
+## `chronicle show`
+
+Prints the full transcript for a session, identified by its session ID.
+
+```bash
+chronicle show <session-id> [--format text|raw]
+```
+
+| Flag | Description | Default |
+|---|---|---|
+| `--format text` | Renders user and assistant turns in a readable format. | Default |
+| `--format raw` | Streams the original JSONL untouched, one event per line. | — |
+
+Use `--format raw` when you want to pipe the JSONL to another tool or inspect the raw event stream.
+
+## Global flags
+
+These flags apply to all commands and must appear before the subcommand name.
+
+| Flag | Alias | Description |
+|---|---|---|
+| `--root <path>` | — | Override the default `~/.claude/projects/` root directory. |
+| `--version` | — | Print the CLI version and exit. |
+| `--help` | `-h` | Print usage and exit. |
+
+## Usage examples
+
+```bash
+# List all workspaces with session counts
+chronicle list
+
+# List the 10 most recent sessions in your current directory's workspace
+chronicle sessions -n 10
+
+# List sessions for a specific workspace by decoded path
+chronicle sessions -w /Users/me/code/my-app -n 25
+
+# List sessions for a workspace by its on-disk folder name
+chronicle sessions -w -Users-me-code-my-app
+
+# Search every transcript for a substring
+chronicle search "EXC_BAD_ACCESS"
+
+# Search with a higher result limit
+chronicle search "connection refused" --limit 100
+
+# Print a transcript in readable form
+chronicle show 01886499-a9e2-4a70-8e73-9075cda0c74c
+
+# Stream the raw JSONL for a session
+chronicle show 01886499-a9e2-4a70-8e73-9075cda0c74c --format raw
+
+# Use a non-default root directory
+chronicle --root /Volumes/external/.claude/projects list
+```

@@ -1,0 +1,49 @@
+---
+title: 'Stats Dashboard: Token Usage and Activity Heatmaps'
+description: 'View per-project token usage, estimated cost by model, an hour-by-weekday activity grid, and a 90-day calendar heatmap, all from local SQLite.'
+keywords: ['stats dashboard', 'token usage', 'activity heatmap', 'cost estimate', 'per-project stats', 'SQLite', 'calendar heatmap']
+---
+
+The stats dashboard gives you a quantitative view of how you use your CLI coding assistants. It aggregates session data from Chronicle's in-process SQLite database and presents it as token breakdowns, cost estimates, and two heatmaps. Like everything in Chronicle, all data stays on your Mac — there's no analytics service, no API call, no extra query layer between the UI and the database.
+
+Open the dashboard with `⌘2` or by clicking the Stats tab. All data shown is scoped to the active provider; switching to Codex shows only Codex session stats.
+
+## Per-project token usage
+
+The top section of the dashboard lists every workspace (project) for the active provider with:
+
+- **Input tokens** — sum of `input_tokens` across all sessions in the workspace
+- **Output tokens** — sum of `output_tokens` across all sessions in the workspace
+- **Total tokens** — combined input and output
+- **Model** — the most-recent model string seen in sessions for that workspace (e.g. `claude-opus-4-7-20250101`, `gpt-5.4`, `gemini-3-flash-preview`)
+
+<Note>
+  Token values are extracted during indexing from each session file. For Claude Code sessions, input and output tokens come from the `input_tokens` and `output_tokens` fields in each assistant turn. Codex and Gemini sessions follow the same extraction pattern from their respective formats.
+</Note>
+
+## Estimated cost
+
+Chronicle calculates an estimated cost for each workspace using standard published pricing tiers for the models it detects. The model column shows the actual model string from the session data, so cost estimates reflect the real model used, not a provider-level approximation.
+
+<Info>
+  Cost estimates are informational. Pricing tiers are embedded in the app and may lag behind provider announcements. For billing purposes, consult your provider's usage dashboard directly.
+</Info>
+
+## Activity heatmaps
+
+### Hour-by-weekday heatmap
+
+A grid with hours of the day (0–23) on one axis and days of the week on the other. Cell color intensity reflects the volume of session activity during that hour-of-day and day-of-week combination. This shows your work patterns at a glance — when during the week you actually reach for the CLI assistant most.
+
+### 90-day calendar heatmap
+
+A GitHub-style calendar grid covering the last 90 days. Each day cell is colored by total token activity. Hovering over any cell shows a popover with:
+
+- The top 3 workspaces by token usage that day
+- The total token count for the day
+
+Both heatmaps read from the same in-process SQLite handle that powers the rest of the app. There's no aggregation daemon, no materialized view, and no separate query layer — the data is already indexed and the aggregation runs inline.
+
+<Tip>
+  The 90-day heatmap's hover popover is a fast way to correlate a busy day with which projects you were working on, without filtering the session list manually.
+</Tip>

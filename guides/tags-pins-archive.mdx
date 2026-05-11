@@ -1,0 +1,61 @@
+---
+title: 'Tags, Pins, Archive, and Session Organization'
+description: 'Right-click any session to pin it, apply color tags, rename it, add notes, archive it, or soft-delete it — all without touching the underlying transcript files.'
+keywords: ['tags', 'pins', 'archive', 'soft-delete', 'rename session', 'notes', 'context menu', 'session organization', 'iCloud sync']
+---
+
+Chronicle keeps the transcript files written by Claude Code, Codex CLI, and Gemini CLI exactly as those tools left them. All organizational state — pins, tags, custom titles, notes, and archive flags — lives exclusively in Chronicle's own SQLite database. Right-clicking any session gives you a context menu with all the tools you need to keep a growing session history manageable.
+
+## Opening the context menu
+
+Right-click any session row in the session list to open the context menu. Every action in the menu is non-destructive by default: soft-delete is the only action that removes a session from view, and it carries a 30-day undo window.
+
+## Available actions
+
+<AccordionGroup>
+  <Accordion title="Pin">
+    Marks the session in the sidebar for quick access. Pinned sessions appear in the **Pinned** section of both the main session list and the menubar dropdown. Pins are per-provider — a pin on a Claude session does not appear in your Codex or Gemini sidebar.
+  </Accordion>
+  <Accordion title="Tag with color">
+    Applies one or more color-keyed labels to the session. Tags use an OKLCH hue angle (0–360) rendered at a consistent lightness and chroma, giving you eight canonical swatches in the tag picker plus the ability to enter an arbitrary hue value. Tags are per-provider and are used by the `/tag:` search filter and smart-folder definitions.
+  </Accordion>
+  <Accordion title="Rename">
+    Replaces the auto-generated title — Chronicle's default is the first user message from the transcript — with a custom title you supply. The custom title is stored in the `user_metadata` table in SQLite and takes precedence over the parsed title everywhere in the UI. Renaming does not touch the JSONL or JSON file on disk.
+  </Accordion>
+  <Accordion title="Add note">
+    Attaches a free-form text note to the session. Notes appear in the metadata pane and sync via iCloud when sync is enabled. There is no length limit.
+  </Accordion>
+  <Accordion title="Archive">
+    Hides the session from the main session list without deleting it. Archived sessions are excluded from smart folders by default and can be viewed by selecting the **Archived** filter. Archiving is reversible: right-click an archived session and choose **Unarchive**.
+  </Accordion>
+  <Accordion title="Move to Trash">
+    Soft-deletes the session. The session disappears from all views immediately but is recoverable for 30 days. After 30 days the record in Chronicle's database is purged. The underlying JSONL or JSON transcript file on disk is never deleted or modified.
+  </Accordion>
+</AccordionGroup>
+
+## What Chronicle never touches
+
+<Warning>
+  Chronicle reads the source transcript files written by each CLI (`~/.claude/projects/`, `~/.codex/sessions/`, `~/.gemini/tmp/`) and never writes to them. Every organizational operation — pin, tag, rename, note, archive, delete — is stored only in Chronicle's SQLite index at `~/Library/Application Support/Chronicle/chronicle.sqlite`.
+</Warning>
+
+## iCloud sync
+
+When iCloud Drive sync is enabled, organizational state syncs across your Macs via a single JSON file in iCloud Drive. The sync includes:
+
+- Pin flags
+- Tag definitions and session-tag associations
+- Archive flags
+- Custom titles (renames)
+- Notes
+- Smart-folder definitions
+
+Every synced record carries the provider it belongs to, so a Codex pin on one Mac does not appear under Claude on another. See [iCloud sync](/guides/icloud-sync) for setup instructions and what the sync file contains.
+
+<Note>
+  Transcript content never syncs. Only the organizational metadata travels through iCloud.
+</Note>
+
+## Per-provider scoping
+
+All organizational state is scoped to the active provider. Switching from Claude to Codex swaps every list, including pinned sessions and tag assignments. A tag named "bug" under Claude is a different record from a tag named "bug" under Codex — they share a name but are independent.

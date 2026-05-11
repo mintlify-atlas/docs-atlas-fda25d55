@@ -1,0 +1,59 @@
+---
+title: "Chronicle FAQ: common questions answered"
+description: "Answers to the most common questions about Chronicle — macOS version requirements, uninstalling, data storage, sandboxing, iCloud sync, and ad-hoc signing."
+---
+
+Common questions about Chronicle, collected from issues and feedback. If your question isn't here, open an issue at [github.com/josephyaduvanshi/claude-history-manager](https://github.com/josephyaduvanshi/claude-history-manager).
+
+<AccordionGroup>
+  <Accordion title="Why does Chronicle require macOS 15?">
+    Chronicle uses SwiftUI features and font APIs — specifically variable-font width and optical sizing on `Font.custom` — that ship in macOS 15. Backporting to macOS 14 would mean rewriting the typography system and dropping several visual features. macOS 15 has been out long enough to be widely adopted, so the trade-off isn't worth it. If you're not on macOS 15, Chronicle won't launch.
+  </Accordion>
+
+  <Accordion title="How do I uninstall Chronicle?">
+    Drag `Chronicle.app` from `/Applications/` to the Trash, then remove the database and preferences:
+
+    ```bash
+    rm -rf ~/Library/Application\ Support/Chronicle
+    defaults delete com.chronicle.app
+    ```
+
+    If you had iCloud sync enabled and want to remove the cloud copy too:
+
+    ```bash
+    rm -rf ~/Library/Mobile\ Documents/com~apple~CloudDocs/Chronicle
+    ```
+
+    The underlying CLI session files in `~/.claude/projects/`, `~/.codex/sessions/`, and `~/.gemini/tmp/` are never touched.
+  </Accordion>
+
+  <Accordion title="Where is my data stored?">
+    Your data lives in a few different places:
+
+    - `~/.claude/projects/`, `~/.codex/sessions/`, and `~/.gemini/tmp/` are the source-of-truth transcripts each CLI writes. Chronicle reads these but never modifies them.
+    - `~/Library/Application Support/Chronicle/chronicle.sqlite` is Chronicle's own index, plus your pins, tags, notes, custom titles, and smart-folder definitions. Every record carries which provider it belongs to so the three datasets stay separate.
+    - `~/Library/Mobile Documents/com~apple~CloudDocs/Chronicle/chronicle-sync.json` is only present if you enabled iCloud sync. It contains metadata only — no transcripts, no message bodies.
+  </Accordion>
+
+  <Accordion title="Is Chronicle sandboxed?">
+    No. Chronicle reads from `~/.claude/projects/`, `~/.codex/sessions/`, and `~/.gemini/tmp/`, writes to its own Application Support folder, and shells out to launch terminals. None of those operations are compatible with the macOS App Sandbox. If a future App Store release happens, sandboxing will be revisited at that point.
+  </Accordion>
+
+  <Accordion title="Can I sync Chronicle across my Macs with iCloud?">
+    Yes. Toggle sync on in **Settings → Sync**. Only metadata syncs: tags, pins, archive flags, custom titles, notes, and smart-folder definitions. Transcripts stay on the device they were generated on, because they live under each CLI's own folder and those CLIs write per-machine. Every synced record carries the provider it belongs to, so a Codex pin on one Mac doesn't appear under Claude on another.
+  </Accordion>
+
+  <Accordion title="Why is Chronicle ad-hoc signed instead of notarized?">
+    Notarization requires a paid Apple Developer ID ($99/year). This project doesn't have one yet. Until that changes, Chronicle ships ad-hoc signed and you'll need to run `xattr -cr /Applications/Chronicle.app` once on first install if you use the `.dmg` or `.zip`. The Homebrew cask and the `.pkg` installer handle this automatically. The in-app first-launch card also detects the quarantine attribute and shows the command with a copy button.
+
+    The binary you download is bit-for-bit what the GitHub Actions workflow builds from `main`, and each release page lists a `.shasums` file so you can verify the download if you want to.
+  </Accordion>
+
+  <Accordion title="Is Chronicle a plugin for Claude Code, Codex, or Gemini?">
+    No. Chronicle is a standalone macOS app. It reads the same files those CLIs write to, but it doesn't hook into them, modify their behavior, or require any of them to be running. You can use Chronicle while none of the CLIs are installed, as long as you have existing session files on disk.
+  </Accordion>
+
+  <Accordion title="Will Chronicle slow down my Mac?">
+    No. The app idles at near-zero CPU when nothing is changing. The file-system watcher uses FSEvents rather than polling, so inactive workspaces cost nothing. The one place that does real work is the initial bootstrap on first launch, which takes 60 to 90 seconds for a few thousand sessions and only happens once. Subsequent launches open a warm SQLite cache in around 75 milliseconds.
+  </Accordion>
+</AccordionGroup>

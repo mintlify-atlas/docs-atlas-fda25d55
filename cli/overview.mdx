@@ -1,0 +1,48 @@
+---
+title: "Chronicle CLI: browse sessions without the macOS app"
+description: "The chronicle CLI reads Claude Code session files directly — no SQLite indexer, no daemon. Works on Linux and macOS for headless or remote dev environments."
+---
+
+The `chronicle` CLI is a small companion binary that lets you browse Claude Code session history from a terminal — on Linux, on macOS without the GUI app, or in a remote SSH session. It reads the same `~/.claude/projects/` directory the macOS app uses, but does so directly and on-demand, with no background indexer, no SQLite database, and no daemon.
+
+## What it is
+
+The CLI is a single-file, Foundation-only Swift binary, statically linked against the Swift standard library. It has no dependency on GRDB, no FTS index, and no persistent state — every command reads the JSONL files fresh from disk and exits. This keeps it suitable for remote Linux dev boxes where the GUI app cannot run.
+
+<Note>
+  The CLI currently reads only **Claude Code** sessions (`~/.claude/projects/`). Codex CLI and Gemini CLI session support is not yet implemented in the CLI tool.
+</Note>
+
+## Commands
+
+The CLI exposes four commands:
+
+| Command | Description |
+|---|---|
+| `list` | Show every workspace under `~/.claude/projects/` with session count and last activity |
+| `sessions` | List sessions in a workspace, newest first |
+| `search` | Substring search across every session transcript |
+| `show` | Print a session transcript in rendered or raw JSONL form |
+
+See [CLI commands](/cli/commands) for full flag reference and examples.
+
+## Global flags
+
+| Flag | Description |
+|---|---|
+| `--root <path>` | Override the default `~/.claude/projects/` root |
+| `--version` | Print the CLI version and exit |
+| `--help`, `-h` | Print usage and exit |
+
+## Platform support
+
+| Platform | Architectures |
+|---|---|
+| Linux | x86_64, aarch64 |
+| macOS | arm64 (Apple Silicon), x86_64 (Intel) |
+
+On macOS, you can also build the CLI from source using the `Package.swift` in the repository, which includes the `ChronicleCLI` target. See [CLI installation](/cli/installation) for details.
+
+## No daemon, no background process
+
+When the CLI exits, nothing continues running. There is no file-system watcher, no indexer, no helper process. Every invocation is a fresh read from disk.

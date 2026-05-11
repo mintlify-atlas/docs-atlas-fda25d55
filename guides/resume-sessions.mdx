@@ -1,0 +1,99 @@
+---
+title: 'Resume Sessions in Any Terminal or Editor'
+description: 'Pick up any Claude Code, Codex CLI, or Gemini CLI session in Ghostty, iTerm, Terminal.app, Alacritty, WezTerm, or kitty with one keystroke.'
+keywords: ['resume session', 'terminal launcher', 'Ghostty', 'iTerm', 'claude --resume', 'codex resume', 'gemini --resume', 'working directory']
+---
+
+Chronicle can resume any indexed session directly inside the terminal and editor of your choice. Select a session in the list, press a key, and Chronicle builds the correct provider-specific resume command — preserving the original working directory — and hands it off to your terminal. Nothing to copy, nothing to paste.
+
+## Keyboard shortcuts for resuming
+
+| Shortcut | Action |
+|---|---|
+| `↵` | Resume the selected session in your default terminal |
+| `⌘↵` | Open the terminal picker dropdown to choose a terminal for this session |
+| `⌘⇧↵` | Resume the most-recently-modified session in your default terminal without opening any UI |
+
+`⌘⇧↵` is the fastest path when you just want to jump back into your last session without touching the main window or the menubar dropdown — it works system-wide.
+
+## Supported terminals
+
+Chronicle detects which terminals are installed and only shows the ones it finds. Detection resolves the installed `.app` bundle first, then falls back to a CLI shim on `PATH`.
+
+<CardGroup cols={3}>
+  <Card title="Ghostty" icon="terminal">
+    Uses `ghostty --working-directory=...` to open the session in a new window at the correct path.
+  </Card>
+  <Card title="iTerm" icon="terminal">
+    Uses AppleScript to open a new window and run the resume command.
+  </Card>
+  <Card title="Terminal.app" icon="terminal">
+    Uses AppleScript to open a new tab or window.
+  </Card>
+  <Card title="Alacritty" icon="terminal">
+    Launches via the Alacritty CLI with the correct working directory.
+  </Card>
+  <Card title="WezTerm" icon="terminal">
+    Launches via the WezTerm CLI.
+  </Card>
+  <Card title="kitty" icon="terminal">
+    Launches via the kitty remote-control interface.
+  </Card>
+</CardGroup>
+
+Only terminals that are actually installed appear in the terminal picker. If a terminal you expected to see is missing, verify it is installed as an `.app` bundle in `/Applications/` or that its CLI shim is on your `PATH`.
+
+## Provider-specific resume commands
+
+Chronicle routes to the correct CLI command based on the session's provider. The working directory from the original session is preserved in the command.
+
+<Tabs>
+  <Tab title="Claude Code">
+    ```bash
+    claude --resume <uuid>
+    ```
+    The UUID is the session identifier Chronicle reads from the JSONL file under `~/.claude/projects/`.
+  </Tab>
+  <Tab title="Codex CLI">
+    ```bash
+    codex resume <uuid>
+    ```
+    Note that `resume` is a subcommand, not a flag — `codex --resume` is not valid syntax.
+  </Tab>
+  <Tab title="Gemini CLI">
+    ```bash
+    gemini --resume <uuid>
+    ```
+    Chronicle passes the full UUID, not a numeric session index.
+  </Tab>
+</Tabs>
+
+## Setting a default terminal
+
+Your default terminal applies to `↵` and `⌘⇧↵`. To change it:
+
+<Steps>
+  <Step title="Open Settings">
+    Press `⌘,` to open Settings.
+  </Step>
+  <Step title="Select the Terminal pane">
+    Click **Terminal** in the Settings sidebar.
+  </Step>
+  <Step title="Pick your terminal">
+    Choose from the terminals Chronicle detected on your system. Only installed terminals appear in the list.
+  </Step>
+</Steps>
+
+## Per-session terminal override
+
+You can pick a different terminal for a specific session without changing your default. Press `⌘↵` with a session selected to open the terminal picker dropdown for that session only. The override is one-time — your default is not changed.
+
+## Opening sessions in an editor
+
+Alongside the terminal launcher, Chronicle can open any session's working directory in your code editor. The **Open in \<Editor\>** action supports VS Code, Cursor, Zed, and Xcode, using the same install-detection logic as the terminal launcher (bundle lookup first, CLI shim on `PATH` as fallback). Use `⌘,` → **Editor** to set your default.
+
+## Ghostty security prompt
+
+<Warning>
+  Every time you resume a session in Ghostty, macOS shows a one-time-per-click "Allow Ghostty to execute…" confirmation dialog. This is a Ghostty security gate and cannot be turned off in Ghostty's configuration. The other supported terminals do not show this prompt.
+</Warning>

@@ -1,0 +1,68 @@
+---
+title: 'Transcript View: Read and Navigate Session Conversations'
+description: 'Rendered session view with syntax-highlighted code, collapsible tool calls, a message TOC, and a metadata pane showing tokens, model, and files touched.'
+keywords: ['transcript view', 'conversation view', 'code highlighting', 'tool calls', 'TOC', 'metadata pane', 'Quick Look', 'files touched']
+---
+
+The transcript view opens when you double-click any session in the session list. It renders the full conversation as a readable document: markdown formatting applied to all message bodies, code blocks highlighted by language, and tool calls presented inline as collapsible items rather than raw JSON. The view is provider-aware, so tool-only turns — common in Claude and Codex sessions — don't leave blank message bubbles.
+
+## Conversation area
+
+The main panel shows the conversation as a sequence of user and assistant turns. Chronicle uses [swift-markdown-ui](https://github.com/gonzalezreal/swift-markdown-ui) to render markdown and [Splash](https://github.com/JohnSundell/Splash) to syntax-highlight code blocks. Language detection is automatic from the code fence tag.
+
+### Tool calls
+
+Tool invocations appear inline in the conversation at the point where the assistant made them. Each tool call is collapsed by default, showing the tool name and a summary. Click to expand the full input and output. This applies to all providers:
+
+- **Claude Code** — tool calls such as `Write`, `Edit`, `Bash`, `Read`, and others
+- **Codex CLI** — `apply_patch`, `exec_command`, and related tools
+- **Gemini CLI** — `write_file` and other Gemini tool calls
+
+## Table of contents sidebar
+
+A TOC panel on the left side of the transcript view lists every message and tool call in the session in order. Click any entry to jump directly to that position in the conversation. The TOC is especially useful in long sessions where scrolling through hundreds of turns is impractical.
+
+## Metadata pane
+
+The right-hand panel shows structured metadata extracted from the session file:
+
+| Field | Description |
+|---|---|
+| Started at | Timestamp of the first message |
+| Duration | Wall-clock time from first to last message |
+| Model | Actual model string from the session (e.g. `claude-sonnet-4-5`, `gpt-5.4`, `gemini-3-flash-preview`) |
+| Total tokens | Sum of input and output tokens across all turns |
+| Input tokens | Sum of `input_tokens` across all assistant turns |
+| Output tokens | Sum of `output_tokens` across all assistant turns |
+| Files touched | Paths of files the assistant wrote or edited during the session |
+| Tools used | Names of all distinct tool calls made during the session |
+
+<Note>
+  The model field shows the actual model string from the session data, not the API endpoint or provider name. A session started with `claude-opus-4-7-20250101` will display that exact string, not "Claude" or "Opus".
+</Note>
+
+### Files touched
+
+Chronicle extracts the "files touched" list from the actual tool calls in each session's transcript, not from a separate log. The extraction is provider-specific:
+
+<Tabs>
+  <Tab title="Claude Code">
+    Reads file paths from `Write` and `Edit` tool call inputs.
+  </Tab>
+  <Tab title="Codex CLI">
+    Reads file paths from `apply_patch` diffs and file-shaped `exec_command` invocations.
+  </Tab>
+  <Tab title="Gemini CLI">
+    Reads file paths from `write_file` tool call inputs.
+  </Tab>
+</Tabs>
+
+## Quick Look preview
+
+Press `⌘Y` on any selected session in the session list to open a Quick Look popover — a 300×480 preview of the first approximately 40 lines of the transcript. The full transcript view does not open. Press `Esc` to dismiss the popover.
+
+This mirrors the Quick Look behavior in Finder: a fast way to verify you have the right session before committing to opening it fully.
+
+<Tip>
+  Quick Look works from the keyboard without clicking into the session. Select a session with the arrow keys, then press `⌘Y` to preview it in place.
+</Tip>

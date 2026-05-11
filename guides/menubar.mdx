@@ -1,0 +1,57 @@
+---
+title: 'Menubar Dropdown: Access Sessions from Anywhere'
+description: "Press ⌘⇧O from any app to open Chronicle's 480px menubar popover showing live, recent, and pinned sessions — no need to switch to the main window."
+keywords: ['menubar', 'global hotkey', 'menubar dropdown', 'live sessions', 'pinned sessions', 'provider tiles', 'keyboard shortcut']
+---
+
+Chronicle lives in your Mac's menu bar so you can reach your sessions without switching away from whatever you are working in. A single global hotkey drops down a 480px popover showing your live, recent, and pinned sessions for the active provider. From there you can resume a session, switch providers, or dismiss the popover — all without touching the main window.
+
+## Opening and closing the dropdown
+
+Press `⌘⇧O` from anywhere on the system to open the menubar dropdown. The same shortcut closes it. Press `⎋` to dismiss it without making a selection.
+
+## What the dropdown shows
+
+The 480px popover is organized into three sections for the active provider:
+
+<CardGroup cols={3}>
+  <Card title="Live sessions" icon="circle">
+    Sessions currently being written to by one of the three CLIs, marked with a green pulse. Polled every two seconds.
+  </Card>
+  <Card title="Recent sessions" icon="clock">
+    The most recently modified sessions for the active provider, ordered newest first.
+  </Card>
+  <Card title="Pinned sessions" icon="pin">
+    Sessions you have pinned for the active provider. Pins are per-provider.
+  </Card>
+</CardGroup>
+
+## Keyboard navigation
+
+<AccordionGroup>
+  <Accordion title="Launch a visible row (⌘1–⌘9)">
+    Press `⌘1` through `⌘9` to resume the corresponding row in the dropdown using your default terminal. Rows are numbered top to bottom.
+  </Accordion>
+  <Accordion title="Resume the most-recent session (⌘⇧↵)">
+    Press `⌘⇧↵` to resume the most-recently-modified session in your default terminal immediately. The dropdown does not need to be open — this shortcut works system-wide.
+  </Accordion>
+  <Accordion title="Dismiss (⎋)">
+    Press `⎋` to close the dropdown without taking any action.
+  </Accordion>
+</AccordionGroup>
+
+## Switching providers in the dropdown
+
+The dropdown is scoped to the active provider. Provider tiles at the top of the popover let you switch between Claude, Codex, and Gemini without opening the main window. Tapping a tile immediately updates the live, recent, and pinned session lists for that provider.
+
+<Note>
+  Provider tiles only appear for providers that have at least one indexed session on disk. If a CLI has never been run on your Mac, its tile is not rendered.
+</Note>
+
+## Relationship to the main window
+
+The menubar dropdown and the main Chronicle window share the same active provider. Switching providers in the dropdown updates the main window when you open it, and vice versa.
+
+<Tip>
+  `⌘⇧↵` is the fastest way to jump back into your most recent session: it works system-wide, requires no visible UI, and completes in a single keystroke whether the dropdown is open or closed.
+</Tip>

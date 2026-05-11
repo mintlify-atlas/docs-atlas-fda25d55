@@ -1,0 +1,97 @@
+---
+title: 'Session Browser: Navigate All Your CLI Sessions'
+description: 'Browse Claude Code, Codex, and Gemini CLI sessions in one app. Switch providers instantly, see live sessions, and manage sessions from the right-click menu.'
+keywords: ['session browser', 'provider switcher', 'workspace sidebar', 'live sessions', 'Claude Code', 'Codex CLI', 'Gemini CLI']
+---
+
+Chronicle reads sessions from three CLI coding assistants — Claude Code, Codex CLI, and Gemini CLI — and presents them in a unified browser window. Each provider is isolated: pins, tags, notes, custom titles, and smart folders you create under Claude never appear under Codex or Gemini. Switching providers swaps every list, count, and stat in the window simultaneously.
+
+## Supported providers
+
+<CardGroup cols={3}>
+  <Card title="Claude Code" icon="sparkle">
+    Reads JSONL files from `~/.claude/projects/`. Each workspace is a subdirectory named after the encoded project path (e.g. `-Users-you-Code-flutter-myapp`).
+  </Card>
+  <Card title="Codex CLI" icon="hexagon">
+    Reads rollout files at `~/.codex/sessions/<year>/<month>/<day>/rollout-*.jsonl`, grouped by each session's working directory.
+  </Card>
+  <Card title="Gemini CLI" icon="diamond">
+    Reads single JSON files at `~/.gemini/tmp/<project-dir>/chats/session-*.json`, one file per session.
+  </Card>
+</CardGroup>
+
+## Switching providers
+
+Three surfaces let you change the active provider:
+
+- **Segmented control** in the title bar — the fastest path when Chronicle is already in focus.
+- **Menubar tile grid** — switch provider directly from the `⌘⇧O` popover without opening the main window.
+- **View menu** — keyboard-accessible from any macOS context.
+
+Switching providers is immediate. The session list, workspace sidebar, smart folders, and stats dashboard all update to reflect the newly active provider. Per-provider data isolation means a Claude pin doesn't appear in your Codex sidebar and vice versa.
+
+<Note>
+  The `ProviderID` enum used internally has three cases: `.claude`, `.codex`, and `.gemini`. Every SQLite row — sessions, tags, pins, notes, smart folders — carries this value so the three datasets stay completely separate.
+</Note>
+
+## Workspace sidebar
+
+The left sidebar lists all workspaces for the active provider. Chronicle decodes each provider's storage layout back into real filesystem paths, then buckets every workspace into one of nine color-coded categories:
+
+| Category | Matched paths |
+|---|---|
+| AI/CLAUDE | Projects that work on AI or Claude-related code |
+| FLUTTER | Flutter and Dart projects |
+| SECURITY | Security, CTF, and audit projects |
+| RUST | Rust projects |
+| GO | Go projects |
+| PYTHON | Python projects |
+| WEB | Web frontend projects |
+| WORK | General work projects |
+| OTHER | Everything else |
+
+Each category header is click-to-collapse, so the sidebar stays scannable even when you have dozens of workspaces. Selecting a workspace filters the session list to that workspace only.
+
+## Session list
+
+Each row in the session list shows:
+
+- **Title** — the first user message, truncated to fit the row
+- **Relative timestamp** — e.g. "2 hours ago", "yesterday"
+- **Token count** — total tokens for the session
+- **Message count** — number of turns
+- **Model name** — the actual model string from the session file (e.g. `claude-sonnet-4-5`, `gpt-5.4`, `gemini-3-flash-preview`)
+
+## Live session detection
+
+A green pulse marks any session that one of the three CLIs is currently writing to. Chronicle polls the watched directories for the active provider every two seconds, so the indicator updates in near real-time.
+
+<Tip>
+  The live pulse is useful when you have multiple terminals open at once and need to identify which one is the active conversation.
+</Tip>
+
+## Right-click context menu
+
+Right-clicking any session row opens a context menu with the following actions:
+
+<AccordionGroup>
+  <Accordion title="Pin">
+    Pins the session to the top of the list. Pins are per-provider and sync via iCloud if sync is enabled.
+  </Accordion>
+  <Accordion title="Tag">
+    Applies one or more color-keyed tags. Tags are used by smart folders and the `/tag:` search filter.
+  </Accordion>
+  <Accordion title="Archive">
+    Moves the session out of the main list into an archived view. Archived sessions are excluded from smart folders by default.
+  </Accordion>
+  <Accordion title="Rename">
+    Replaces the auto-generated title (first user message) with a custom title. The custom title persists and syncs.
+  </Accordion>
+  <Accordion title="Delete">
+    Soft-deletes the session with a 30-day undo window. The underlying JSONL or JSON file on disk is never modified — Chronicle only marks the session as deleted in its own SQLite index.
+  </Accordion>
+</AccordionGroup>
+
+<Warning>
+  Chronicle never modifies the source transcript files. All mutations (pins, tags, archive, rename, delete) are stored in Chronicle's own SQLite database at `~/Library/Application Support/Chronicle/chronicle.sqlite`.
+</Warning>

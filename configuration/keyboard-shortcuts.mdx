@@ -1,0 +1,45 @@
+---
+title: "Keyboard shortcuts reference for Chronicle"
+description: "Complete reference for Chronicle's keyboard shortcuts — search, navigation, Quick Look, menubar hotkey, session resume, and tab switching."
+---
+
+Chronicle is designed to be driven from the keyboard. Every common action has a shortcut, and the most frequent action — resuming the last session — works system-wide without opening any UI.
+
+## Main window
+
+These shortcuts are active when the Chronicle main window is focused.
+
+| Shortcut | Action |
+|---|---|
+| `⌘K` | Focus the global search field |
+| `⌘1` | Switch to the Sessions tab |
+| `⌘2` | Switch to the Stats tab |
+| `⌘Y` | Quick Look the selected session (300×480 popover, ~40 lines, `Esc` to dismiss) |
+| `⌘,` | Open Settings |
+| `↑` / `↓` | Move the selection in any list |
+| `↵` | Resume the selected session in the default terminal |
+| `⌘↵` | Open the terminal picker for the selected session |
+
+## System-wide
+
+These shortcuts work from anywhere on the system, even when Chronicle is not the frontmost app.
+
+| Shortcut | Action |
+|---|---|
+| `⌘⇧O` | Toggle the menubar dropdown open or closed |
+| `⌘⇧↵` | Resume the most-recently-modified session in the default terminal (no UI) |
+
+`⌘⇧↵` is the fastest path back into your last session — it fires the resume command immediately, with no window to open or row to select.
+
+## Menubar dropdown
+
+These shortcuts are active when the menubar dropdown is open.
+
+| Shortcut | Action |
+|---|---|
+| `⌘1` – `⌘9` | Launch the Nth visible row |
+| `⎋` | Dismiss the dropdown |
+
+<Tip>
+  `⌘1` through `⌘9` in the menubar dropdown are independent of `⌘1` and `⌘2` in the main window. The tab-switching shortcuts only apply when the main window is focused; the row-launch shortcuts only apply when the dropdown is open.
+</Tip>

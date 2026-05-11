@@ -1,0 +1,58 @@
+---
+title: "Appearance settings: themes, accents, and density"
+description: "Chronicle ships seven built-in themes, eight coral accent presets, a custom color picker, and three density modes: compact, comfortable, and spacious."
+---
+
+Chronicle's appearance settings give you fine-grained control over how the app looks and how much information it packs into each row. You can choose from seven named themes — each a distinct full-palette design, not just a light/dark toggle — tune the accent color used by two of those themes, and pick a density mode that fits your screen size and working style.
+
+Open **Settings** with `⌘,` and click the **Appearance** tab.
+
+## Themes
+
+Chronicle ships seven named themes. Each theme defines its own complete color palette; they are not inversions or tints of a single base design.
+
+| Theme | Mode | Vibe |
+|---|---|---|
+| Dark Chronicle | dark | Default. Coral on near-black, the look shown in the screenshots. |
+| Github | light | GitHub Light feel. Blue accent, clean white surfaces. |
+| Gothic | dark | Deep purple on near-black. Blood-red highlights. |
+| Newsprint | light | Sepia and cream. Warm brown accent. Reads like a paperback. |
+| Night | dark | True midnight blue. Cobalt accent. Cold and surgical. |
+| Pixyll | light | Tufte-flavored white. Red accent. Sharp narrow rules. |
+| Whitey | light | Near-monochrome. Coral accent. The minimal end of the spectrum. |
+
+Click a theme name in the Appearance tab to apply it instantly. The change is live — no restart needed.
+
+## Accent color
+
+Eight coral accent presets and a custom color picker let you change the highlight color used across the UI. Accent color changes only affect **Dark Chronicle** and **Whitey** — the two themes built around a coral accent. The other five themes use their own fixed accent colors that are baked into their palette.
+
+To use the custom picker, select **Custom** from the accent preset row and click the color swatch that appears. The picker uses the native macOS color panel, so you can enter a hex value, use the eyedropper, or save swatches for reuse.
+
+<Note>
+  Accent color changes have no visual effect when Gothic, Github, Newsprint, Night, or Pixyll is the active theme.
+</Note>
+
+## Density modes
+
+Three density modes control how much vertical space each row consumes and how large the metadata pane text appears.
+
+| Mode | Row height | Padding | Metadata pane font |
+|---|---|---|---|
+| Compact | Minimal | Tight | Smaller |
+| Comfortable | Standard | Balanced | Standard |
+| Spacious | Generous | Relaxed | Larger |
+
+Choose **Compact** for a dense list when you have many sessions to scan. Choose **Spacious** for larger displays or when you prefer more breathing room between rows.
+
+## Storing preferences
+
+Appearance preferences are stored in `UserDefaults` under `chronicle.*` keys. They persist across app restarts automatically. Resetting to defaults requires deleting the preference domain:
+
+```bash
+defaults delete com.chronicle.app
+```
+
+<Warning>
+  The `defaults delete` command removes all Chronicle preferences, not just appearance settings. Your SQLite index and session metadata are unaffected — only settings are reset.
+</Warning>

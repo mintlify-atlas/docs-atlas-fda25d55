@@ -1,0 +1,102 @@
+{
+  "projectType": "saas",
+  "projectName": "Chronicle",
+  "projectDescription": "A native macOS browser for CLI coding-assistant session history — Claude Code, Codex CLI, and Gemini CLI — with full-text search, smart folders, tags, and one-keystroke session resume.",
+  "theme": "willow",
+  "primaryColor": "#848c8e",
+  "lightColor": "#11161e",
+  "darkColor": "#cfd0d2",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "installation",
+              "first-launch"
+            ]
+          },
+          {
+            "group": "Core Features",
+            "pages": [
+              "features/session-browser",
+              "features/search",
+              "features/smart-folders",
+              "features/transcript-view",
+              "features/stats-dashboard"
+            ]
+          },
+          {
+            "group": "Using Chronicle",
+            "pages": [
+              "guides/resume-sessions",
+              "guides/tags-pins-archive",
+              "guides/menubar",
+              "guides/icloud-sync"
+            ]
+          },
+          {
+            "group": "Configuration",
+            "pages": [
+              "configuration/appearance",
+              "configuration/terminals-editors",
+              "configuration/keyboard-shortcuts"
+            ]
+          },
+          {
+            "group": "Reference",
+            "pages": [
+              "reference/privacy",
+              "reference/faq",
+              "reference/contributing"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "CLI Reference",
+        "groups": [
+          {
+            "group": "Chronicle CLI",
+            "pages": [
+              "cli/overview",
+              "cli/installation",
+              "cli/commands"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Multi-provider support: Claude Code, Codex CLI, and Gemini CLI with per-provider data isolation",
+    "SQLite FTS5 full-text search across all session transcripts with slash-filter syntax",
+    "Smart folders (built-in and custom) for filtering sessions by date, tags, flags, and keywords",
+    "Markdown-rendered transcript view with syntax-highlighted code blocks and collapsible tool calls",
+    "One-keystroke session resume in Ghostty, iTerm, Terminal.app, Alacritty, WezTerm, or kitty",
+    "Menubar dropdown with global hotkey (⌘⇧O) for quick session access from anywhere",
+    "Live session detection — green pulse marks sessions actively being written to",
+    "iCloud Drive metadata sync (tags, pins, notes, smart folders) without uploading transcripts",
+    "Stats dashboard with per-project token usage, cost estimates, and activity heatmaps",
+    "In-app auto-update via Sparkle with EdDSA signature verification",
+    "Seven built-in themes with full custom palettes and three density modes",
+    "Linux/macOS CLI companion for headless environments"
+  ],
+  "publicApiSurface": [
+    "chronicle list",
+    "chronicle sessions [-w <workspace>] [-n <count>]",
+    "chronicle search <query> [--limit <n>]",
+    "chronicle show <session-id> [--format text|raw]",
+    "SearchQuery (struct with titleText, fullText, tags, workspaces, timeWindow fields)",
+    "SearchQueryParser.parse(_:) -> SearchQuery",
+    "SmartFolder (struct with id, name, query, sortOrder, isBuiltIn)",
+    "SmartFolderQuery (.today, .thisWeek, .lastNDays, .usedGitPush, .erroredSessions, .search, .compound)",
+    "SessionMetadata (struct with sessionID, workspaceID, title, provider, model, tokenCount, etc.)",
+    "ProviderID (.claude, .codex, .gemini)",
+    "Provider (protocol: isAvailable, watchRoots, makeParser, resumeCommand)",
+    "SessionParser (protocol: parse(url:workspaceID:))"
+  ]
+}

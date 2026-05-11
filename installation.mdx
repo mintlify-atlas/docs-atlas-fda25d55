@@ -1,0 +1,190 @@
+---
+title: "Install Chronicle on macOS"
+description: "Four ways to install Chronicle on macOS 15+: Homebrew cask (recommended), .pkg installer, .dmg, .zip, or build from source with Swift."
+---
+
+Chronicle is a Universal binary that runs natively on both Apple Silicon and Intel Macs. It requires macOS 15 or newer. Pick the installation method that fits your workflow — Homebrew is the lowest-friction option if you already use it, while the `.pkg` installer works well if you prefer not to use a package manager.
+
+<Note>
+  Chronicle is ad-hoc signed, not notarized. Apple notarization requires a paid Developer ID ($99/year) that this project doesn't carry yet. Every release lists SHA256 checksums on the release page so you can verify the download. See [First launch](/first-launch) for the exact Gatekeeper prompts each install method produces.
+</Note>
+
+## System requirements
+
+- **macOS 15** (Sequoia) or newer
+- **Architecture:** Universal binary — arm64 (Apple Silicon) and x86_64 (Intel)
+
+## Installation methods
+
+<Tabs>
+  <Tab title="Homebrew (recommended)">
+    Homebrew handles the download, the drag into `/Applications/`, and the Gatekeeper unquarantine step in one command. No manual steps required.
+
+    <Steps>
+      <Step title="Add the tap">
+        ```bash
+        brew tap josephyaduvanshi/chronicle
+        ```
+      </Step>
+      <Step title="Install the cask">
+        ```bash
+        brew install --cask chronicle
+        ```
+      </Step>
+      <Step title="Launch Chronicle">
+        Open **Chronicle** from `/Applications/` or Spotlight. No additional Gatekeeper prompts appear.
+      </Step>
+    </Steps>
+
+    ### Updating
+
+    ```bash
+    brew update && brew upgrade --cask chronicle
+    ```
+
+    The tap bumps automatically on every release. If `brew install` reports a 404 on the DMG, your local tap cache is stale — run `brew update` first.
+
+    ### Taking over a manual install
+
+    If you previously dragged `Chronicle.app` into `/Applications/` and now want Homebrew to manage it:
+
+    ```bash
+    brew install --cask chronicle --force
+    ```
+
+    <Tip>
+      The tap source is [josephyaduvanshi/homebrew-chronicle](https://github.com/josephyaduvanshi/homebrew-chronicle) if you want to inspect the cask formula before installing.
+    </Tip>
+  </Tab>
+
+  <Tab title=".pkg installer">
+    The `.pkg` installer is the lowest-friction option without Homebrew. Its postinstall script strips the Gatekeeper quarantine attribute automatically, so no `xattr` command is needed after installation.
+
+    <Steps>
+      <Step title="Download the package">
+        Go to the [GitHub Releases page](https://github.com/josephyaduvanshi/claude-history-manager/releases) and download `Chronicle-<version>.pkg` from the latest release.
+      </Step>
+      <Step title="Open the installer">
+        Because Chronicle is not signed with a paid Developer ID, macOS will block a double-click. Instead, **right-click** the `.pkg` file and choose **Open**, then click **Open** again in the confirmation dialog.
+
+        <Note>
+          This one-time prompt will not appear again for future updates installed via the `.pkg`.
+        </Note>
+      </Step>
+      <Step title="Follow the installer prompts">
+        The installer places `Chronicle.app` in `/Applications/` and removes the quarantine attribute via a postinstall script.
+      </Step>
+      <Step title="Launch Chronicle">
+        Open Chronicle from `/Applications/` or Spotlight. No `xattr` command is needed.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title=".dmg">
+    <Steps>
+      <Step title="Download the disk image">
+        Go to the [GitHub Releases page](https://github.com/josephyaduvanshi/claude-history-manager/releases) and download `Chronicle-<version>.dmg`.
+      </Step>
+      <Step title="Mount and copy">
+        Open the `.dmg` file, then drag `Chronicle.app` onto the **Applications** shortcut inside the disk image window.
+      </Step>
+      <Step title="Strip the quarantine attribute">
+        Open Terminal and run:
+
+        ```bash
+        xattr -cr /Applications/Chronicle.app
+        ```
+
+        This removes the Gatekeeper quarantine flag that macOS attaches to files downloaded from the internet. Without this step, macOS will block the app from launching with an "Apple could not verify" message. You can also right-click `Chronicle.app` → **Open** → **Open** as an alternative.
+      </Step>
+      <Step title="Launch Chronicle">
+        Open Chronicle from `/Applications/` or Spotlight.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title=".zip">
+    <Steps>
+      <Step title="Download the archive">
+        Go to the [GitHub Releases page](https://github.com/josephyaduvanshi/claude-history-manager/releases) and download `Chronicle-<version>.zip`.
+      </Step>
+      <Step title="Unzip and move">
+        Unzip the archive, then drag `Chronicle.app` into `/Applications/`.
+      </Step>
+      <Step title="Strip the quarantine attribute">
+        Open Terminal and run:
+
+        ```bash
+        xattr -cr /Applications/Chronicle.app
+        ```
+
+        <Note>
+          If you skip this step, Chronicle still opens — but it will show an in-app card with this same command and a copy-to-clipboard button, so you can run it without switching to Terminal manually.
+        </Note>
+      </Step>
+      <Step title="Launch Chronicle">
+        Open Chronicle from `/Applications/` or Spotlight.
+      </Step>
+    </Steps>
+  </Tab>
+
+  <Tab title="Build from source">
+    Chronicle is a pure Swift Package with no Xcode project or signing configuration required. A recent Xcode toolchain is the only dependency.
+
+    <Steps>
+      <Step title="Clone the repository">
+        ```bash
+        git clone https://github.com/josephyaduvanshi/claude-history-manager.git
+        ```
+      </Step>
+      <Step title="Build a release binary">
+        ```bash
+        swift build -c release
+        ```
+      </Step>
+      <Step title="Run the binary">
+        ```bash
+        .build/release/Chronicle
+        ```
+      </Step>
+    </Steps>
+
+    <Note>
+      Running the raw binary works for development. For a proper `.app` bundle with a Dock icon and `Info.plist`, use the GitHub Actions workflow at `.github/workflows/release.yml` as a template, or copy the binary into a hand-rolled bundle alongside `Resources/Info.plist.in`.
+    </Note>
+
+    Run the test suite before sending a pull request:
+
+    ```bash
+    swift test
+    ```
+  </Tab>
+</Tabs>
+
+## Updating Chronicle
+
+<Tabs>
+  <Tab title="Homebrew">
+    ```bash
+    brew update && brew upgrade --cask chronicle
+    ```
+  </Tab>
+  <Tab title="In-app update">
+    Chronicle includes built-in update support via [Sparkle](https://sparkle-project.org). Go to **Chronicle menu → Check for updates…** to fetch the latest release. If a newer version is available, Chronicle downloads, verifies, and swaps the running bundle in place. Each release is signed with an EdDSA key embedded in the app, so a tampered download is rejected before it touches `/Applications/`.
+
+    <Note>
+      No background polling occurs. The only outbound network call Chronicle makes is the one you trigger by clicking **Check for updates…**
+    </Note>
+  </Tab>
+</Tabs>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="First launch" icon="rocket" href="/first-launch">
+    What to expect on first launch, Gatekeeper dialogs, granting Full Disk Access, and initial indexing.
+  </Card>
+  <Card title="Search sessions" icon="magnifying-glass" href="/features/search">
+    Use slash-filter syntax and FTS5 full-text search to find any session instantly.
+  </Card>
+</CardGroup>

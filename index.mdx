@@ -1,133 +1,80 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
-icon: 'star'
+title: "Chronicle: macOS browser for CLI session history"
+description: "Chronicle indexes Claude Code, Codex CLI, and Gemini CLI sessions into local SQLite. Search, pin, tag, and resume any session in one keystroke."
 ---
 
-## Setting up
+Chronicle is a native macOS app that turns your CLI coding-assistant session history into something you can actually browse. It reads session files from Claude Code, Codex CLI, and Gemini CLI directly from your Mac, indexes everything into a local SQLite database, and gives you instant search, smart folders, transcript rendering, and one-click session resume — all without sending any data off your machine.
 
-Get your documentation site up and running in minutes.
-
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
-
-## Make it yours
-
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Install Chronicle" icon="download" href="/installation">
+    Install via Homebrew, .pkg, .dmg, or build from source. Get running in minutes.
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="First launch" icon="rocket" href="/first-launch">
+    What to expect on first launch, Gatekeeper prompts, and initial indexing.
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Search sessions" icon="magnifying-glass" href="/features/search">
+    Full-text FTS5 search and slash-filter syntax for finding any session fast.
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Resume sessions" icon="terminal" href="/guides/resume-sessions">
+    Pick up any session in Ghostty, iTerm, Terminal.app, Alacritty, WezTerm, or kitty.
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## What Chronicle does
 
-Everything you need to create world-class documentation.
+Chronicle solves the problem of three CLI coding assistants writing session transcripts in three different formats to three different corners of your home directory. After a few weeks of real use, those folders are unreadable and ungrepable.
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
+<CardGroup cols={3}>
+  <Card title="Multi-provider" icon="layer-group">
+    Reads Claude Code (`~/.claude/projects/`), Codex CLI (`~/.codex/sessions/`), and Gemini CLI (`~/.gemini/tmp/`) with full per-provider data isolation.
   </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
+  <Card title="Local-first" icon="lock">
+    Transcripts never leave your Mac. The SQLite index lives in `~/Library/Application Support/Chronicle/`. No telemetry, no cloud upload.
   </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
+  <Card title="Fast search" icon="bolt">
+    Title search is instant from the indexed metadata. Type `/full:` to drop into FTS5 transcript search across every session body.
   </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+</CardGroup>
 
-## Make your content agent ready
+## Core features
 
-Make your docs work for humans and AI agents alike.
+<CardGroup cols={2}>
+  <Card title="Session browser" icon="list" href="/features/session-browser">
+    Color-coded workspace sidebar, live session detection, and per-provider filtering.
+  </Card>
+  <Card title="Smart folders" icon="folder-open" href="/features/smart-folders">
+    Built-in and custom saved searches filtering by date, tags, token count, and keywords.
+  </Card>
+  <Card title="Transcript view" icon="file-lines" href="/features/transcript-view">
+    Markdown-rendered conversations with syntax-highlighted code, collapsible tool calls, and a TOC sidebar.
+  </Card>
+  <Card title="Stats dashboard" icon="chart-bar" href="/features/stats-dashboard">
+    Per-project token usage, cost estimates, and activity heatmaps.
+  </Card>
+</CardGroup>
 
-<Columns cols={2}>
-  <Card
-    title="Prompt component"
-    icon="robot"
-    href="/agent-ready/prompt"
-  >
-    Embed shareable AI prompts readers can copy or open in Cursor.
-  </Card>
-  <Card
-    title="Visibility"
-    icon="eye"
-    href="/agent-ready/visibility"
-  >
-    Show different content to humans and agents reading your docs.
-  </Card>
-  <Card
-    title="Contextual menu"
-    icon="bolt"
-    href="/agent-ready/contextual"
-  >
-    Give readers one-click access to Claude, ChatGPT, Cursor, and more.
-  </Card>
-  <Card
-    title="AI coding tools"
-    icon="wand-magic-sparkles"
-    href="/ai-tools/claude-code"
-  >
-    Set up Claude Code, Cursor, or Windsurf with Mintlify's skill.
-  </Card>
-</Columns>
+## Get started
 
-## Need inspiration?
+<Steps>
+  <Step title="Install Chronicle">
+    The quickest path is Homebrew:
+    ```bash
+    brew tap josephyaduvanshi/chronicle
+    brew install --cask chronicle
+    ```
+    See [Installation](/installation) for `.pkg`, `.dmg`, and build-from-source options.
+  </Step>
+  <Step title="Launch and index">
+    Open Chronicle from `/Applications/`. On first launch it indexes your session history — about 60–90 seconds for a few thousand sessions. Grant **Full Disk Access** in System Settings if the sidebar is empty.
+  </Step>
+  <Step title="Browse and search">
+    Use the workspace sidebar to browse by project. Press `⌘K` to focus the search bar. Type `/full: your query` to search transcript bodies with FTS5.
+  </Step>
+  <Step title="Resume a session">
+    Select any session and press `↵` to resume in your default terminal, or use the action bar dropdown to pick a specific terminal or editor.
+  </Step>
+</Steps>
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+<Note>
+  Chronicle requires macOS 15 or newer. It uses SwiftUI APIs and font features that ship in macOS 15.
+</Note>
